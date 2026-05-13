@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import StatsBar from './components/StatsBar'
 import { analyzeArea, pollJob, getResults } from './api'
+import './global.css'
 
 export default function App() {
   const [jobId, setJobId] = useState(null)
@@ -12,14 +13,14 @@ export default function App() {
   const [selectedBlock, setSelectedBlock] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [cityName, setCityName] = useState('New York')
+  const [cityName, setCityName] = useState('')
+  const [mapViewState, setMapViewState] = useState(null)
 
   const handleSubmit = useCallback(async (bboxInput, city) => {
     setLoading(true)
     setError(null)
     setResults(null)
     setSelectedBlock(null)
-    setJobId(null)
     setCityName(city)
 
     try {
@@ -55,7 +56,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Navbar cityName={cityName} results={results} loading={loading} />
+      <Navbar cityName={cityName} results={results} loading={loading} jobStatus={jobStatus} />
       <div className="main-layout">
         <Sidebar
           onSubmit={handleSubmit}
@@ -75,14 +76,6 @@ export default function App() {
           />
         </div>
       </div>
-
-      <style>{`
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #080c14; color: #e2e8f0; overflow: hidden; }
-        .app-shell { display: flex; flex-direction: column; height: 100vh; }
-        .main-layout { display: flex; flex: 1; overflow: hidden; }
-        .map-area { flex: 1; position: relative; display: flex; flex-direction: column; }
-      `}</style>
     </div>
   )
 }
