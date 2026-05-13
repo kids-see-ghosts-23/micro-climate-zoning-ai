@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 import os
 
 from backend.database import init_db
+# Models must be imported before init_db so SQLAlchemy registers them
+import backend.models  # noqa: F401
 from backend.routers import analysis, jobs, blocks
 
 
@@ -20,7 +22,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 
 app.add_middleware(
     CORSMiddleware,

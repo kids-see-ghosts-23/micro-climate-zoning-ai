@@ -1,13 +1,13 @@
 import uuid
 import asyncio
+import traceback
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from backend.database import get_db
+from backend.database import get_db, AsyncSessionLocal
 from backend.models import AnalysisJob, CityBlock
-from backend.schemas import AnalyzeRequest, AnalyzeResponse, SimulateRequest
-from backend.schemas import JobStatus
+from backend.schemas import AnalyzeRequest, AnalyzeResponse, SimulateRequest, JobStatus
 
 router = APIRouter()
 
@@ -29,19 +29,12 @@ async def analyze(
     db.add(job)
     await db.commit()
 
-    # Run in background (no Celery needed)
     background_tasks.add_task(_run_analysis, job_id, request.bbox.model_dump(), request.city_name)
 
     return AnalyzeResponse(job_id=job_id, status=JobStatus.pending, message="Analysis job queued.")
 
 
 async def _run_analysis(job_id: str, bbox: dict, city_name: str = None):
-    from backend.database import AsyncSessionLocal
-    from data_ingestion.osm_loader import load_city_blocks
-    from data_ingestion.satellite import fetch_thermal_imagery
-    from ai_model.pinn_inference import PINNInference
-    from zoning_engine.code_generator import generate_zoning_codes
-
     async with AsyncSessionLocal() as db:
         try:
             # Mark running
@@ -49,8 +42,13 @@ async def _run_analysis(job_id: str, bbox: dict, city_name: str = None):
             job.status = "running"
             await db.commit()
 
-            # Run pipeline in thread pool to avoid blocking the event loop
             loop = asyncio.get_event_loop()
+
+            # Import here to avoid circular imports
+            from data_ingestion.osm_loader import load_city_blocks
+            from data_ingestion.satellite import fetch_thermal_imagery
+            from ai_model.pinn_inference import PINNInference
+            from zoning_engine.code_generator import generate_zoning_codes
 
             blocks = await loop.run_in_executor(None, load_city_blocks, bbox)
             thermal = await loop.run_in_executor(None, fetch_thermal_imagery, bbox)
@@ -84,24 +82,24 @@ async def _run_analysis(job_id: str, bbox: dict, city_name: str = None):
             await db.commit()
 
         except Exception as e:
-            async with AsyncSessionLocal() as err_db:
-                job = await err_db.get(AnalysisJob, job_id)
+            traceback.print_exc()
+            try:
+                job = await db.get(AnalysisJob, job_id)
                 if job:
                     job.status = "failed"
                     job.error_message = str(e)
-                    await err_db.commit()
+                    await db.commit()
+            except Exception:
+                pass
 
 
 @router.post("/simulate")
 async def simulate(request: SimulateRequest):
     from data_ingestion.osm_loader import load_city_blocks
     from ai_model.pinn_inference import PINNInference
-    import asyncio
 
     loop = asyncio.get_event_loop()
     blocks = await loop.run_in_executor(None, load_city_blocks, request.bbox.model_dump())
     model = PINNInference()
-    predictions = await loop.run_in_executor(
-        None, model.predict, blocks, None,
-    )
+    predictions = await loop.run_in_executor(None, model.predict, blocks, None)
     return {"blocks": len(predictions), "predictions": predictions[:10]}
