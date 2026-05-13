@@ -145,7 +145,7 @@ export default function Sidebar({ onSubmit, loading, jobStatus, error, results, 
                 value={cityInput}
                 onChange={handleCityInput}
                 onKeyDown={e => e.key === 'Enter' && handleRun()}
-                placeholder="Type any city (e.g. Kurnool, Berlin...)"
+                placeholder="Enter city name..."
                 style={{ ...I, paddingRight: resolvedCity ? 36 : 12 }}
               />
               {resolvedCity && (
