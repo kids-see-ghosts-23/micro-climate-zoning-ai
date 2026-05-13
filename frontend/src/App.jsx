@@ -1,30 +1,32 @@
 import React, { useState, useCallback } from 'react'
 import MapView from './components/MapView'
-import AnalysisPanel from './components/AnalysisPanel'
-import ResultsPanel from './components/ResultsPanel'
+import Sidebar from './components/Sidebar'
+import Navbar from './components/Navbar'
+import StatsBar from './components/StatsBar'
 import { analyzeArea, pollJob, getResults } from './api'
 
 export default function App() {
-  const [bbox, setBbox] = useState(null)
   const [jobId, setJobId] = useState(null)
   const [jobStatus, setJobStatus] = useState(null)
   const [results, setResults] = useState(null)
   const [selectedBlock, setSelectedBlock] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [cityName, setCityName] = useState('New York')
 
-  const handleSubmit = useCallback(async (bboxInput, cityName) => {
+  const handleSubmit = useCallback(async (bboxInput, city) => {
     setLoading(true)
     setError(null)
     setResults(null)
+    setSelectedBlock(null)
     setJobId(null)
+    setCityName(city)
 
     try {
-      const { job_id } = await analyzeArea(bboxInput, cityName)
+      const { job_id } = await analyzeArea(bboxInput, city)
       setJobId(job_id)
       setJobStatus('pending')
 
-      // Poll until complete
       const interval = setInterval(async () => {
         try {
           const job = await pollJob(job_id)
@@ -45,7 +47,6 @@ export default function App() {
           setLoading(false)
         }
       }, 2000)
-
     } catch (e) {
       setError(e.message)
       setLoading(false)
@@ -53,44 +54,35 @@ export default function App() {
   }, [])
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0f0f0f' }}>
-      {/* Left panel */}
-      <div style={{ width: 360, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid #222' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #222' }}>
-          <h1 style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>
-            Micro-Climate Zoning AI
-          </h1>
-          <p style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-            Block-by-block zoning codes via PINN simulation
-          </p>
-        </div>
-
-        <AnalysisPanel
+    <div className="app-shell">
+      <Navbar cityName={cityName} results={results} loading={loading} />
+      <div className="main-layout">
+        <Sidebar
           onSubmit={handleSubmit}
           loading={loading}
           jobStatus={jobStatus}
           error={error}
+          results={results}
+          selectedBlock={selectedBlock}
+          onSelectBlock={setSelectedBlock}
         />
-
-        {results && (
-          <ResultsPanel
+        <div className="map-area">
+          {results && <StatsBar results={results} />}
+          <MapView
             results={results}
             selectedBlock={selectedBlock}
             onSelectBlock={setSelectedBlock}
           />
-        )}
+        </div>
       </div>
 
-      {/* Map */}
-      <div style={{ flex: 1 }}>
-        <MapView
-          results={results}
-          bbox={bbox}
-          onBboxChange={setBbox}
-          selectedBlock={selectedBlock}
-          onSelectBlock={setSelectedBlock}
-        />
-      </div>
+      <style>{`
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #080c14; color: #e2e8f0; overflow: hidden; }
+        .app-shell { display: flex; flex-direction: column; height: 100vh; }
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        .map-area { flex: 1; position: relative; display: flex; flex-direction: column; }
+      `}</style>
     </div>
   )
 }
