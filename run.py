@@ -4,7 +4,9 @@ Run: python run.py
 """
 import subprocess
 import sys
-import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 def check_deps():
@@ -22,6 +24,12 @@ if __name__ == "__main__":
     print("\n=== Micro-Climate Zoning AI ===")
     print("API:       http://localhost:8000")
     print("API Docs:  http://localhost:8000/docs")
-    print("Frontend:  open frontend/ separately with: cd frontend && npm run dev")
+    print("Frontend:  cd frontend && npm run dev")
     print("Press Ctrl+C to stop\n")
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        log_level="info",
+    )
