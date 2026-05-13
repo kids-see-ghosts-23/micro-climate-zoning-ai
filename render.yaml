@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: micro-climate-zoning-ai
+    runtime: python
+    buildCommand: pip install fastapi uvicorn[standard] sqlalchemy[asyncio] aiosqlite numpy pydantic pydantic-settings python-dotenv aiofiles python-multipart greenlet
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: 3.11.0
