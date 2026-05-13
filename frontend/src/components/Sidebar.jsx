@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { geocodeCity } from '../geocode'
+import UHIInfo from './UHIInfo'
 
 const PRESETS = [
   { name: 'New York', bbox: [-74.01, 40.705, -73.97, 40.725] },
@@ -121,6 +122,7 @@ export default function Sidebar({ onSubmit, loading, jobStatus, error, results, 
         {[
           { id: 'config', label: 'Configure' },
           { id: 'results', label: `Results${sorted.length ? ` (${sorted.length})` : ''}` },
+          { id: 'info', label: 'UHI Guide' },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             flex: 1, padding: '14px 0', fontSize: 11, fontWeight: 700,
@@ -260,6 +262,8 @@ export default function Sidebar({ onSubmit, loading, jobStatus, error, results, 
           )}
         </div>
       )}
+
+      {tab === 'info' && <UHIInfo />}
 
       {/* Results tab */}
       {tab === 'results' && (
