@@ -11,15 +11,16 @@ class JobStatus(str, Enum):
 
 
 class BoundingBox(BaseModel):
-    min_lon: float = Field(..., description="Minimum longitude (west)")
-    min_lat: float = Field(..., description="Minimum latitude (south)")
-    max_lon: float = Field(..., description="Maximum longitude (east)")
-    max_lat: float = Field(..., description="Maximum latitude (north)")
+    min_lon: float
+    min_lat: float
+    max_lon: float
+    max_lat: float
 
 
 class AnalyzeRequest(BaseModel):
     bbox: BoundingBox
     city_name: Optional[str] = None
+    analysis_date: Optional[str] = None  # YYYY-MM-DD, defaults to latest available
 
 
 class ZoningDirective(BaseModel):
@@ -48,6 +49,7 @@ class JobResponse(BaseModel):
     status: JobStatus
     city_name: Optional[str]
     bbox: dict
+    analysis_date: Optional[str]
     created_at: Optional[Any]
     updated_at: Optional[Any]
     error_message: Optional[str]

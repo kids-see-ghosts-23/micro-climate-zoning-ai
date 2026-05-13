@@ -10,6 +10,7 @@ class AnalysisJob(Base):
     status = Column(String, default="pending", nullable=False)
     bbox = Column(JSON, nullable=False)
     city_name = Column(String, nullable=True)
+    analysis_date = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     error_message = Column(String, nullable=True)
