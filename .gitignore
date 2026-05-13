@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+gee-key.json
+
+# Model checkpoints
+ai_model/checkpoints/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OpenFOAM
+simulation/*/processor*/
+simulation/*/postProcessing/
+simulation/*/VTK/
+*.foam
+
+# Logs
+*.log
+celerybeat-schedule
+
+# Docker volumes
+postgres_data/
