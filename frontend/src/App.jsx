@@ -14,8 +14,9 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [cityName, setCityName] = useState('')
+  const [mapViewState, setMapViewState] = useState(null)
 
-  const handleSubmit = useCallback(async (bboxInput, city, analysisDate) => {
+  const handleSubmit = useCallback(async (bboxInput, city) => {
     setLoading(true)
     setError(null)
     setResults(null)
@@ -23,7 +24,7 @@ export default function App() {
     setCityName(city)
 
     try {
-      const { job_id } = await analyzeArea(bboxInput, city, analysisDate)
+      const { job_id } = await analyzeArea(bboxInput, city)
       setJobId(job_id)
       setJobStatus('pending')
 

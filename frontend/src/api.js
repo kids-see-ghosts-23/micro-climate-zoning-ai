@@ -13,11 +13,10 @@ async function request(method, path, body) {
   return res.json()
 }
 
-export const analyzeArea = (bbox, cityName, analysisDate) =>
+export const analyzeArea = (bbox, cityName) =>
   request('POST', '/api/v1/analyze', {
     bbox,
     city_name: cityName,
-    analysis_date: analysisDate || null,
   })
 
 export const pollJob = (jobId) =>
